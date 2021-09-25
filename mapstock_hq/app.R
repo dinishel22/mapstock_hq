@@ -50,7 +50,17 @@ server <- function(input, output) {
     
     output$stockmap <- renderLeaflet({
         leaflet() %>%
-            addTiles()
+        #Basemaps
+        addTiles(group = "OSM") %>%
+        addProviderTiles(providers$Stamen.Toner, group = "Toner") %>% 
+        addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>% 
+        addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
+        addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") %>%
+        addProviderTiles(providers$Esri.WorldImagery, group = "Esri Imagery") %>%
+        #Layer control
+        addLayersControl(
+            baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
+            options = layersControlOptions(collapsed = TRUE))
              
     })
 
