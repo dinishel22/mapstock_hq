@@ -13,6 +13,81 @@ library(leaflet)
 library(bslib)
 
 #OPERATIONS
+#Scrape the data from a website
+library(rvest)
+#To be used by the stringr package
+library(tidyverse)
+#To manipulate/clean the address string from rvest   
+library(stringr)
+#
+library(dplyr)
+# Put the data in structure tydygeocoder understands, tibble
+library(tibble)
+#To turn address into geographical coordenates
+library(tidygeocoder)
+#Transform the data tibble into a mapping-ready spatial object/dataframe
+library(sf)
+
+
+### Getting the address data from Yahoo Fincance website 
+scrape_address <- function(stock_symbol){
+  search_url<- paste0("https://finance.yahoo.com/quote/", 
+                      stock_symbol, 
+                      "/profile?p=", 
+                      stock_symbol)
+  scrape_result <- read_html(search_url) %>% 
+    html_nodes(".asset-profile-container p:first-child") %>% 
+    html_text2()  
+  return (scrape_result)
+}
+
+### Cleaning the address so it is ready to be used by the Geocoder
+address_cleaner <- function(stock_search){
+  address_to_clean <- scrape_address(stock_search)
+  
+  unwanted_pttrns <- str_c(c("react-text: \\d+","/react-text"),
+                           collapse = "|")
+  
+  clean_address <- str_remove_all(address_to_clean,unwanted_pttrns)
+  clean_address <- str_split(clean_address,"\n")[[1]][1:4]
+  clean_address<- str_c(clean_address,collapse = "")
+  
+  return(clean_address)
+}
+
+
+### Not strictly necessary, but decided to company name separately for now
+scrape_name <- function(stock_symbol){
+  search_url<- paste0("https://finance.yahoo.com/quote/", 
+                      stock_symbol, 
+                      "/profile?p=", 
+                      stock_symbol)
+  scrape_result <- read_html(search_url) %>% 
+    html_nodes(".asset-profile-container h3") %>% 
+    html_text2()  
+  return (scrape_result)
+}
+
+### Use the clean address in the Geocoder to get the coordinates
+geocode_stock <- function(stock_search){
+  #get the name of the company
+  company_name <- scrape_name(stock_search)
+  #get the address of company's HQ
+  company_address <- address_cleaner(stock_search)
+  #Join name and address into a data table/tibble
+  address_tibble <- tribble(
+    ~name,                  ~addr,
+    company_name,          company_address)
+  #geocodes the address, adds lat&long coordinates to the table/tibble
+  lat_longs <- address_tibble %>%
+    geocode( addr,method = "arcgis", lat = lat , long = lon)
+  # we,re good to go, but we'll add an extra step
+  # We'll create an sf point layer, for easier mapping
+  stock_pt_layer_sf <- st_as_sf(lat_longs, coords = c("lon", "lat"), crs = 4326)
+  return(stock_pt_layer_sf)
+}
+### Data layer
+
 
 
 # Define UI for my mapping application 
@@ -50,11 +125,14 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+  company_layer <- reactive({geocode_stock(input$search)})
     
     output$stockmap <- renderLeaflet({
-        leaflet() %>%
+        leaflet(company_layer) %>%
         #Basemaps
         addTiles(group = "OSM") %>%
+        addMarkers(lng=~long, lat=~lat) %>% 
         addProviderTiles(providers$Stamen.Toner, group = "Toner") %>% 
         addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>% 
         addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
