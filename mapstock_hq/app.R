@@ -12,7 +12,10 @@ library(shinyWidgets)
 library(leaflet)
 library(bslib)
 
-# Define UI for application that draws a histogram
+#OPERATIONS
+
+
+# Define UI for my mapping application 
 ui <- fluidPage(
     # Defining App theme
     theme = bs_theme(version = 5, bootswatch = "cerulean"),
