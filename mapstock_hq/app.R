@@ -129,10 +129,10 @@ server <- function(input, output) {
   company_layer <- reactive({geocode_stock(input$search)})
     
     output$stockmap <- renderLeaflet({
-        leaflet(company_layer) %>%
+        leaflet(company_layer()) %>%
         #Basemaps
         addTiles(group = "OSM") %>%
-        addMarkers(lng=~long, lat=~lat) %>% 
+        addMarkers(popup = ~name, group = "Company") %>% 
         addProviderTiles(providers$Stamen.Toner, group = "Toner") %>% 
         addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>% 
         addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
@@ -141,9 +141,13 @@ server <- function(input, output) {
         #Layer control
         addLayersControl(
             baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
+            overlayGroups = c("Company"),
             options = layersControlOptions(collapsed = TRUE))
              
     })
+    
+    # proxy for dynamic changes on the map
+    
 
 }
 
