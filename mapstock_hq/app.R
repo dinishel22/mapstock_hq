@@ -126,7 +126,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  company_layer <- reactive({geocode_stock(input$search)})
+    company_layer <- reactive({geocode_stock(input$search)})
     
     output$stockmap <- renderLeaflet({
         leaflet(company_layer()) %>%
