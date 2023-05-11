@@ -146,7 +146,7 @@ server <- function(input, output) {
              
     })
     
-    # proxy for dynamic changes on the map
+     # proxy for dynamic changes on the map
     
 
 }
