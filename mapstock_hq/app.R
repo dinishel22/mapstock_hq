@@ -86,6 +86,12 @@ geocode_stock <- function(stock_search){
   stock_pt_layer_sf <- st_as_sf(lat_longs, coords = c("lon", "lat"), crs = 4326)
   return(stock_pt_layer_sf)
 }
+
+#for use in input validation
+`%then%` <- function(a, b){
+  if (is.null(a)) b else a 
+}
+
 ### Data layer
 
 
@@ -116,7 +122,8 @@ ui <- fluidPage(
     # Show a map with the HQ of the searched stock 
     fluidRow(column(12,
     
-        leafletOutput("stockmap", width = "100%", height = "550px")
+        leafletOutput("stockmap", width = "100%", height = "550px"),
+        textOutput("tx")
     ))
     
     # Adding a footer
@@ -126,25 +133,34 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-    company_layer <- reactive({geocode_stock(input$search)})
+  company_layer <- reactive({
+     #adding input validation
+      validate(
+        need(input$search != "", "") %then%
+        need(sjmisc::is_empty(trimws(input$search)) != TRUE, "Input is an empty string") %then%
+        need(try(geocode_stock(input$search)), "Urecognized stock symbol")
+      )
+        geocode_stock(input$search)
     
-    output$stockmap <- renderLeaflet({
-        leaflet(company_layer()) %>%
-        #Basemaps
-        addTiles(group = "OSM") %>%
-        addMarkers(popup = ~name, group = "Company") %>% 
-        addProviderTiles(providers$Stamen.Toner, group = "Toner") %>% 
-        addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>% 
-        addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
-        addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") %>%
-        addProviderTiles(providers$Esri.WorldImagery, group = "Esri Imagery") %>%
-        #Layer control
-        addLayersControl(
-            baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
-            overlayGroups = c("Company"),
-            options = layersControlOptions(collapsed = TRUE))
-             
-    })
+      })
+     output$tx<-renderPrint(company_layer())
+    # output$stockmap <- renderLeaflet({
+    #     leaflet(company_layer()) %>%
+    #     #Basemaps
+    #     addTiles(group = "OSM") %>%
+    #     addMarkers(popup = ~name, group = "Company") %>% 
+    #     addProviderTiles(providers$Stamen.Toner, group = "Toner") %>% 
+    #     addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>% 
+    #     addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
+    #     addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") %>%
+    #     addProviderTiles(providers$Esri.WorldImagery, group = "Esri Imagery") %>%
+    #     #Layer control
+    #     addLayersControl(
+    #         baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
+    #         overlayGroups = c("Company"),
+    #         options = layersControlOptions(collapsed = TRUE))
+    #          
+    # })
     
      # proxy for dynamic changes on the map
     
