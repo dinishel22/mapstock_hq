@@ -92,7 +92,23 @@ geocode_stock <- function(stock_search){
   if (is.null(a)) b else a 
 }
 
-### Data layer
+# Make the map
+make_the_map <- function(data_layer){
+  leaflet(data_layer) %>%
+    #Basemaps
+    addTiles(group = "OSM") %>%
+    addMarkers(popup = ~name, group = "Company") %>%
+    addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
+    addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
+    addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
+    addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") %>%
+    addProviderTiles(providers$Esri.WorldImagery, group = "Esri Imagery") %>%
+    #Layer control
+    addLayersControl(
+      baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
+      overlayGroups = c("Company"),
+      options = layersControlOptions(collapsed = TRUE))
+}
 
 
 
@@ -147,23 +163,23 @@ server <- function(input, output) {
 
     output$stockmap <- renderLeaflet({
         Sys.sleep(1.5)
-        
-      leaflet(company_layer()) %>%
-       #Basemaps
-        addTiles(group = "OSM") %>%
-       addMarkers(popup = ~name, group = "Company") %>%
-        addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
-        addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
-        addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
-        addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") %>%
-        addProviderTiles(providers$Esri.WorldImagery, group = "Esri Imagery") %>%
-      #Layer control
-        addLayersControl(
-            baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
-            overlayGroups = c("Company"),
-            options = layersControlOptions(collapsed = TRUE))
-  
-     })
+        make_the_map(company_layer())
+     #  leaflet(company_layer()) %>%
+     #   #Basemaps
+     #    addTiles(group = "OSM") %>%
+     #   addMarkers(popup = ~name, group = "Company") %>%
+     #    addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
+     #    addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
+     #    addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
+     #    addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") %>%
+     #    addProviderTiles(providers$Esri.WorldImagery, group = "Esri Imagery") %>%
+     #  #Layer control
+     #    addLayersControl(
+     #        baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
+     #        overlayGroups = c("Company"),
+     #        options = layersControlOptions(collapsed = TRUE))
+     # 
+      })
     
      # proxy for dynamic changes on the map
     
