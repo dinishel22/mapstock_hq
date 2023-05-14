@@ -119,7 +119,7 @@ ui <- fluidPage(
 
     # Application title
     
-    titlePanel(h1("Map Stock HQ", align ='center')),
+    titlePanel(h1("Map Stock HQ", align ='center'),"Map Stock HQ"),
 
     # Search bar for stcok symbols or company names
     fluidRow(
@@ -147,7 +147,7 @@ ui <- fluidPage(
     
 )
 
-# Define server logic required to draw a histogram
+# Define server logic required to map the data
 server <- function(input, output) {
   
   company_layer <- reactive({
