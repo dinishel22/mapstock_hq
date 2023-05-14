@@ -139,9 +139,9 @@ ui <- fluidPage(
     fluidRow(column(12,
     
             shinycssloaders::withSpinner(  
-              leafletOutput("stockmap", width = "100%", height = "550px"),
-              type = 4, hide.ui = FALSE)
-    ))
+              leafletOutput("stockmap", width = "100%", height = "800px"),
+              type = 4, hide.ui = FALSE, color = "#2fa4e7")
+    )),
     
     # Adding a footer
     
@@ -160,25 +160,13 @@ server <- function(input, output) {
         geocode_stock(input$search)
     
       })
-
+  
+    # output the map
     output$stockmap <- renderLeaflet({
+       
         Sys.sleep(1.5)
         make_the_map(company_layer())
-     #  leaflet(company_layer()) %>%
-     #   #Basemaps
-     #    addTiles(group = "OSM") %>%
-     #   addMarkers(popup = ~name, group = "Company") %>%
-     #    addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
-     #    addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
-     #    addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark") %>%
-     #    addProviderTiles(providers$CartoDB.Positron, group = "CartoDB Positron") %>%
-     #    addProviderTiles(providers$Esri.WorldImagery, group = "Esri Imagery") %>%
-     #  #Layer control
-     #    addLayersControl(
-     #        baseGroups = c("OSM", "Toner", "Toner Lite", "CartoDB Dark","CartoDB Positron","Esri Imagery"),
-     #        overlayGroups = c("Company"),
-     #        options = layersControlOptions(collapsed = TRUE))
-     # 
+    
       })
     
      # proxy for dynamic changes on the map
