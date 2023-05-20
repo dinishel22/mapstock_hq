@@ -139,7 +139,7 @@ ui <- fluidPage(
     fluidRow(column(12,
     
             shinycssloaders::withSpinner(  
-              leafletOutput("stockmap", width = "100%", height = "800px"),
+              leafletOutput("stockmap", width = "100%", height = "75vh"),
               type = 4, hide.ui = FALSE, color = "#2fa4e7")
     )),
     
