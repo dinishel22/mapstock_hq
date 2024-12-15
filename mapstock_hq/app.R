@@ -31,12 +31,15 @@ library(sf)
 
 ### Getting the address data from Yahoo Fincance website 
 scrape_address <- function(stock_symbol){
+  
   search_url<- paste0("https://finance.yahoo.com/quote/", 
                       stock_symbol, 
-                      "/profile?p=", 
-                      stock_symbol)
-  scrape_result <- read_html(search_url) %>% 
-    html_nodes(".asset-profile-container p:first-child") %>% 
+                      "/profile/")
+  u_agent<- httr::user_agent("Mozilla/5.0 (Windows NT 10.0;   Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")
+  search_session <- html_session(search_url, u_agent)
+  search_response <- search_session$response 
+  scrape_result <- read_html(search_response) %>% 
+    html_nodes("#nimbus-app > section > section > section > article > section:nth-child(3) > section:nth-child(3)") %>% 
     html_text2()  
   return (scrape_result)
 }
@@ -49,7 +52,7 @@ address_cleaner <- function(stock_search){
                            collapse = "|")
   
   clean_address <- str_remove_all(address_to_clean,unwanted_pttrns)
-  clean_address <- str_split(clean_address,"\n")[[1]][1:4]
+  clean_address <- str_split(clean_address,"\n")[[1]][2:4]
   clean_address<- str_c(clean_address,collapse = "")
   
   return(clean_address)
@@ -58,12 +61,15 @@ address_cleaner <- function(stock_search){
 
 ### Not strictly necessary, but decided to company name separately for now
 scrape_name <- function(stock_symbol){
+  
   search_url<- paste0("https://finance.yahoo.com/quote/", 
                       stock_symbol, 
-                      "/profile?p=", 
-                      stock_symbol)
-  scrape_result <- read_html(search_url) %>% 
-    html_nodes(".asset-profile-container h3") %>% 
+                      "/profile/")
+  u_agent<- httr::user_agent("Mozilla/5.0 (Windows NT 10.0;   Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36")
+  search_session <- html_session(search_url, u_agent)
+  search_response <- search_session$response 
+  scrape_result <- read_html(search_response) %>% 
+    html_nodes("#nimbus-app > section > section > section > article > section:nth-child(3) > section:nth-child(3) > header > h3") %>% 
     html_text2()  
   return (scrape_result)
 }
